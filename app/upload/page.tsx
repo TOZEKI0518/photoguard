@@ -54,18 +54,30 @@ export default function UploadPage() {
 
     localStorage.setItem(`photoguard-${id}`, JSON.stringify(data));
 
-    setGeneratedUrl(`http://localhost:3000/password/${id}`);
+    const baseUrl = window.location.origin;
+    setGeneratedUrl(`${baseUrl}/password/${id}`);
     setGeneratedPw(pw);
     setGenerated(true);
   };
 
   return (
-    <main className="min-h-screen bg-white p-6">
-      <h1 className="text-3xl font-bold mb-6">写真アップロード</h1>
+    <main className="min-h-screen bg-white px-5 py-6 text-gray-900">
+      <div className="mb-6">
+        <a href="/" className="text-sm font-bold text-pink-500">
+          ← トップへ戻る
+        </a>
+        <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-gray-950">
+          写真アップロード
+        </h1>
+        <p className="mt-2 text-base font-medium text-gray-700">
+          写真を選択して、保存期間・PW・購入者名を設定します。
+        </p>
+      </div>
 
-      <label className="block border-2 border-dashed border-pink-300 rounded-xl p-10 text-center cursor-pointer">
-        <p className="text-lg font-semibold">JPG / PNG / PDF</p>
-        <p className="text-gray-500 mt-2">クリックして選択</p>
+      <label className="block cursor-pointer rounded-3xl border-2 border-dashed border-pink-300 bg-pink-50/50 p-8 text-center active:scale-[0.99]">
+        <p className="text-lg font-extrabold text-gray-950">JPG / PNG / PDF</p>
+        <p className="mt-2 text-base font-bold text-gray-700">クリックして選択</p>
+        <p className="mt-2 text-sm text-gray-600">複数ファイルを選択できます</p>
         <input
           type="file"
           multiple
@@ -77,32 +89,34 @@ export default function UploadPage() {
 
       {files.length > 0 && (
         <div className="mt-6 space-y-3">
-          <h2 className="font-bold">選択ファイル</h2>
+          <h2 className="text-xl font-extrabold text-gray-950">選択ファイル</h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {previewUrls.map((url, index) => (
-              <img
-                key={url}
-                src={url}
-                alt={`preview-${index}`}
-                className="h-40 w-full rounded-xl object-cover border"
-              />
-            ))}
-          </div>
+          {previewUrls.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {previewUrls.map((url, index) => (
+                <img
+                  key={url}
+                  src={url}
+                  alt={`preview-${index}`}
+                  className="h-40 w-full rounded-2xl border object-cover shadow-sm"
+                />
+              ))}
+            </div>
+          )}
 
           {files.map((file) => (
-            <div key={file.name} className="border rounded-xl p-3">
+            <div key={file.name} className="rounded-2xl border border-gray-200 p-3 text-sm font-bold text-gray-800">
               {file.name}
             </div>
           ))}
         </div>
       )}
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-6 space-y-5">
         <div>
-          <label className="font-bold">保存期間</label>
+          <label className="text-base font-extrabold text-gray-950">保存期間</label>
           <select
-            className="w-full border rounded-xl p-3 mt-2"
+            className="mt-2 w-full rounded-2xl border border-gray-300 bg-white p-4 text-base font-bold text-gray-900"
             value={days}
             onChange={(e) => setDays(e.target.value)}
           >
@@ -114,9 +128,9 @@ export default function UploadPage() {
         </div>
 
         <div>
-          <label className="font-bold">パスワード</label>
+          <label className="text-base font-extrabold text-gray-950">パスワード</label>
           <input
-            className="w-full border rounded-xl p-3 mt-2"
+            className="mt-2 w-full rounded-2xl border border-gray-300 p-4 text-base font-bold text-gray-900 placeholder:text-gray-500"
             placeholder="未入力なら自動生成"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -124,9 +138,9 @@ export default function UploadPage() {
         </div>
 
         <div>
-          <label className="font-bold">購入者名</label>
+          <label className="text-base font-extrabold text-gray-950">購入者名</label>
           <input
-            className="w-full border rounded-xl p-3 mt-2"
+            className="mt-2 w-full rounded-2xl border border-gray-300 p-4 text-base font-bold text-gray-900 placeholder:text-gray-500"
             placeholder="例：山田太郎"
             value={buyerName}
             onChange={(e) => setBuyerName(e.target.value)}
@@ -134,9 +148,9 @@ export default function UploadPage() {
         </div>
 
         <div>
-          <label className="font-bold">メッセージ</label>
+          <label className="text-base font-extrabold text-gray-950">メッセージ</label>
           <textarea
-            className="w-full border rounded-xl p-3 mt-2"
+            className="mt-2 w-full rounded-2xl border border-gray-300 p-4 text-base font-bold text-gray-900 placeholder:text-gray-500"
             placeholder="写真集のご購入ありがとうございます。"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -145,31 +159,31 @@ export default function UploadPage() {
 
         <button
           onClick={handleGenerate}
-          className="w-full bg-pink-500 text-white rounded-xl p-4 font-bold"
+          className="w-full rounded-2xl bg-pink-500 p-4 text-lg font-extrabold text-white shadow-sm active:scale-[0.99]"
         >
           URLを生成する
         </button>
       </div>
 
       {generated && (
-        <div className="mt-8 rounded-2xl bg-pink-50 p-6 space-y-4">
-          <h2 className="text-2xl font-bold">URL発行完了</h2>
+        <div className="mt-8 space-y-4 rounded-3xl border border-pink-100 bg-pink-50 p-6 shadow-sm">
+          <h2 className="text-2xl font-extrabold text-gray-950">URL発行完了</h2>
 
           <div>
-            <p className="font-bold">閲覧URL</p>
-            <div className="border rounded-xl p-3 bg-white mt-2">
+            <p className="font-extrabold text-gray-950">閲覧URL</p>
+            <div className="mt-2 break-all rounded-2xl border bg-white p-3 text-sm font-bold text-gray-800">
               {generatedUrl}
             </div>
           </div>
 
           <div>
-            <p className="font-bold">PW</p>
-            <div className="border rounded-xl p-3 bg-white mt-2">
+            <p className="font-extrabold text-gray-950">PW</p>
+            <div className="mt-2 rounded-2xl border bg-white p-3 text-lg font-extrabold text-gray-950">
               {generatedPw}
             </div>
           </div>
 
-          <p className="text-sm text-gray-600">
+          <p className="text-sm font-bold text-gray-700">
             保存期間：{days}日 / 購入者：{buyerName || "未設定"}
           </p>
         </div>
