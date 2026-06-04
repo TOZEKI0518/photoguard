@@ -6,8 +6,8 @@ export default function Home() {
         <h1 className="text-4xl font-extrabold tracking-tight text-gray-950">
           Photo<span className="text-pink-500">Guard</span>
         </h1>
-        <p className="mt-3 text-base font-medium leading-relaxed text-gray-700">
-          ギガファイル便のように簡単。でも写真は保護される。
+        <p className="mt-3 text-base font-medium text-gray-700">
+          かんたんに送れて、大切な写真はしっかり保護。
         </p>
       </header>
 

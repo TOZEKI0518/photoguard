@@ -21,6 +21,7 @@ export default function UploadPage() {
   const [generated, setGenerated] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [generatedPw, setGeneratedPw] = useState("");
+  const [copiedTarget, setCopiedTarget] = useState<"url" | "pw" | "">("");
 
   const makePassword = () => {
     return Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -37,6 +38,16 @@ export default function UploadPage() {
       .map((file) => URL.createObjectURL(file));
 
     setPreviewUrls(urls);
+  };
+
+  const copyText = async (text: string, target: "url" | "pw") => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedTarget(target);
+      setTimeout(() => setCopiedTarget(""), 1200);
+    } catch {
+      alert("コピーに失敗しました。手動でコピーしてください。");
+    }
   };
 
   const handleGenerate = () => {
@@ -58,6 +69,7 @@ export default function UploadPage() {
     setGeneratedUrl(`${baseUrl}/password/${id}`);
     setGeneratedPw(pw);
     setGenerated(true);
+    setCopiedTarget("");
   };
 
   return (
@@ -105,7 +117,10 @@ export default function UploadPage() {
           )}
 
           {files.map((file) => (
-            <div key={file.name} className="rounded-2xl border border-gray-200 p-3 text-sm font-bold text-gray-800">
+            <div
+              key={file.name}
+              className="rounded-2xl border border-gray-200 p-3 text-sm font-bold text-gray-800"
+            >
               {file.name}
             </div>
           ))}
@@ -171,16 +186,44 @@ export default function UploadPage() {
 
           <div>
             <p className="font-extrabold text-gray-950">閲覧URL</p>
-            <div className="mt-2 break-all rounded-2xl border bg-white p-3 text-sm font-bold text-gray-800">
-              {generatedUrl}
+
+            <div className="mt-2 flex gap-2">
+              <div className="flex-1 break-all rounded-2xl border bg-white p-3 text-sm font-bold text-gray-800">
+                {generatedUrl}
+              </div>
+
+              <button
+                onClick={() => copyText(generatedUrl, "url")}
+                className="shrink-0 rounded-2xl bg-pink-500 px-4 py-3 font-extrabold text-white active:scale-[0.98]"
+              >
+                コピー
+              </button>
             </div>
+
+            {copiedTarget === "url" && (
+              <p className="mt-2 text-sm font-bold text-pink-600">✓ URLをコピーしました</p>
+            )}
           </div>
 
           <div>
             <p className="font-extrabold text-gray-950">PW</p>
-            <div className="mt-2 rounded-2xl border bg-white p-3 text-lg font-extrabold text-gray-950">
-              {generatedPw}
+
+            <div className="mt-2 flex gap-2">
+              <div className="flex-1 rounded-2xl border bg-white p-3 text-lg font-extrabold text-gray-950">
+                {generatedPw}
+              </div>
+
+              <button
+                onClick={() => copyText(generatedPw, "pw")}
+                className="shrink-0 rounded-2xl bg-pink-500 px-4 py-3 font-extrabold text-white active:scale-[0.98]"
+              >
+                コピー
+              </button>
             </div>
+
+            {copiedTarget === "pw" && (
+              <p className="mt-2 text-sm font-bold text-pink-600">✓ PWをコピーしました</p>
+            )}
           </div>
 
           <p className="text-sm font-bold text-gray-700">
