@@ -2,28 +2,45 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { supabase } from "../../../src/lib/supabase";
 
-type StoredPhotoGuardData = {
+type GalleryData = {
   id: string;
-  buyerName: string;
+  buyer_name: string;
   password: string;
   days: string;
-  message: string;
+  message: string | null;
   files: string[];
+  created_at: string;
 };
 
 export default function ViewPage() {
   const params = useParams();
   const [index, setIndex] = useState(0);
-  const [data, setData] = useState<StoredPhotoGuardData | null>(null);
+  const [data, setData] = useState<GalleryData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const id = params.id as string;
-    const saved = localStorage.getItem(`photoguard-${id}`);
+    const fetchGallery = async () => {
+      const id = params.id as string;
 
-    if (saved) {
-      setData(JSON.parse(saved));
-    }
+      const { data, error } = await supabase
+        .from("galleries")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error || !data) {
+        setData(null);
+        setIsLoading(false);
+        return;
+      }
+
+      setData(data as GalleryData);
+      setIsLoading(false);
+    };
+
+    fetchGallery();
   }, [params.id]);
 
   const total = data?.files.length || 0;
@@ -37,9 +54,17 @@ export default function ViewPage() {
     if (index > 0) setIndex(index - 1);
   };
 
+  if (isLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-black text-white">
+        読み込み中...
+      </main>
+    );
+  }
+
   if (!data) {
     return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+      <main className="flex min-h-screen items-center justify-center bg-black text-white">
         データが見つかりません
       </main>
     );
@@ -47,17 +72,17 @@ export default function ViewPage() {
 
   return (
     <main
-      className="min-h-screen bg-black text-white select-none"
+      className="min-h-screen select-none bg-black text-white"
       onContextMenu={(e) => e.preventDefault()}
     >
       <div className="flex items-center justify-between p-4">
-        <span>PhotoGuard</span>
-        <span>
+        <span className="font-bold">PhotoGuard</span>
+        <span className="font-bold">
           {index + 1} / {total}
         </span>
       </div>
 
-      <div className="relative mx-auto flex h-[75vh] max-w-md items-center justify-center bg-neutral-900 overflow-hidden">
+      <div className="relative mx-auto flex h-[75vh] max-w-md items-center justify-center overflow-hidden bg-neutral-900">
         {currentImage ? (
           <img
             src={currentImage}
@@ -72,28 +97,22 @@ export default function ViewPage() {
           </div>
         )}
 
-        <div className="pointer-events-none absolute rotate-[-25deg] text-xl text-white/35">
-          USER: {data.buyerName} / {new Date().toLocaleDateString()}
+        <div className="pointer-events-none absolute rotate-[-25deg] text-xl font-bold text-white/35">
+          USER: {data.buyer_name} / {new Date().toLocaleDateString()}
         </div>
       </div>
 
       <div className="mx-auto mt-6 flex max-w-md justify-between px-6">
-        <button
-          onClick={prev}
-          className="rounded-full bg-white/10 px-6 py-3"
-        >
+        <button onClick={prev} className="rounded-full bg-white/10 px-6 py-3 font-bold">
           ← 前へ
         </button>
 
-        <button
-          onClick={next}
-          className="rounded-full bg-pink-500 px-6 py-3 font-bold"
-        >
+        <button onClick={next} className="rounded-full bg-pink-500 px-6 py-3 font-extrabold">
           次へ →
         </button>
       </div>
 
-      <p className="mt-6 text-center text-sm text-gray-400">
+      <p className="mt-6 text-center text-sm font-bold text-gray-400">
         このコンテンツはダウンロード・保存・右クリックできません
       </p>
     </main>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "../../src/lib/supabase";
 
 type StoredPhotoGuardData = {
   id: string;
@@ -22,6 +23,8 @@ export default function UploadPage() {
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [generatedPw, setGeneratedPw] = useState("");
   const [copiedTarget, setCopiedTarget] = useState<"url" | "pw" | "">("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const makePassword = () => {
     return Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -38,6 +41,10 @@ export default function UploadPage() {
       .map((file) => URL.createObjectURL(file));
 
     setPreviewUrls(urls);
+    setGenerated(false);
+    setGeneratedUrl("");
+    setGeneratedPw("");
+    setUploadError("");
   };
 
   const copyText = async (text: string, target: "url" | "pw") => {
@@ -50,26 +57,98 @@ export default function UploadPage() {
     }
   };
 
-  const handleGenerate = () => {
-    const id = Math.random().toString(36).slice(2, 11);
-    const pw = password || makePassword();
+  const uploadFilesToSupabase = async (id: string) => {
+    const uploadedUrls: string[] = [];
 
-    const data: StoredPhotoGuardData = {
-      id,
-      buyerName: buyerName || "購入者",
-      password: pw,
-      days,
-      message: message || "写真集のご購入ありがとうございます。",
-      files: previewUrls,
-    };
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) continue;
 
-    localStorage.setItem(`photoguard-${id}`, JSON.stringify(data));
+      const extension = file.name.split(".").pop() || "jpg";
+      const safeFileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 8)}.${extension}`;
+      const filePath = `${id}/${safeFileName}`;
 
-    const baseUrl = window.location.origin;
-    setGeneratedUrl(`${baseUrl}/password/${id}`);
-    setGeneratedPw(pw);
-    setGenerated(true);
-    setCopiedTarget("");
+      const { error } = await supabase.storage
+        .from("photos")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type,
+        });
+
+      if (error) throw error;
+
+      const { data } = supabase.storage.from("photos").getPublicUrl(filePath);
+      uploadedUrls.push(data.publicUrl);
+    }
+
+    return uploadedUrls;
+  };
+
+  const handleGenerate = async () => {
+    setUploadError("");
+
+    if (files.length === 0) {
+      setUploadError("ファイルを選択してください。");
+      return;
+    }
+
+    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
+
+    if (imageFiles.length === 0) {
+      setUploadError(
+        "現在のMVPではJPG/PNG画像のみ閲覧できます。PDF対応は次のSprintで追加します。"
+      );
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const id = Math.random().toString(36).slice(2, 11);
+      const pw = password || makePassword();
+
+      const uploadedUrls = await uploadFilesToSupabase(id);
+
+      const galleryData: StoredPhotoGuardData = {
+        id,
+        buyerName: buyerName || "購入者",
+        password: pw,
+        days,
+        message: message || "写真集のご購入ありがとうございます。",
+        files: uploadedUrls,
+      };
+
+      const { error: dbError } = await supabase.from("galleries").insert({
+        id: galleryData.id,
+        buyer_name: galleryData.buyerName,
+        password: galleryData.password,
+        days: galleryData.days,
+        message: galleryData.message,
+        files: galleryData.files,
+      });
+
+      if (dbError) throw dbError;
+
+      // 管理画面用。閲覧側はSupabase DBから取得します。
+      localStorage.setItem(`photoguard-${id}`, JSON.stringify(galleryData));
+
+      const baseUrl = window.location.origin;
+      setGeneratedUrl(`${baseUrl}/password/${id}`);
+      setGeneratedPw(pw);
+      setGenerated(true);
+      setCopiedTarget("");
+    } catch (error) {
+      console.error("Supabase error:", error);
+
+      const message =
+        error instanceof Error ? error.message : JSON.stringify(error);
+
+      setUploadError(`Supabaseエラー: ${message}`);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -172,11 +251,18 @@ export default function UploadPage() {
           />
         </div>
 
+        {uploadError && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-600">
+            {uploadError}
+          </div>
+        )}
+
         <button
           onClick={handleGenerate}
-          className="w-full rounded-2xl bg-pink-500 p-4 text-lg font-extrabold text-white shadow-sm active:scale-[0.99]"
+          disabled={isUploading}
+          className="w-full rounded-2xl bg-pink-500 p-4 text-lg font-extrabold text-white shadow-sm active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-pink-300"
         >
-          URLを生成する
+          {isUploading ? "アップロード中..." : "URLを生成する"}
         </button>
       </div>
 
