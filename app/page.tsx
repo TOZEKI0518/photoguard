@@ -68,6 +68,18 @@ export default function Home() {
           </a>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 px-5 py-6 text-center text-sm font-bold">
+        <div className="flex flex-col gap-3">
+          <a href="/terms" className="text-pink-500 underline">
+            利用規約
+          </a>
+          <a href="/notice" className="text-pink-500 underline">
+            購入者向け注意事項
+          </a>
+        </div>
+      </footer>
     </main>
   );
 }

@@ -47,8 +47,8 @@ export default function TermsPage() {
           <div>
             <h2 className="text-xl font-extrabold text-gray-950">第5条 免責事項</h2>
             <p className="mt-2">
-              ブラウザ版ではOS標準のスクリーンショットや外部機器による撮影を完全に防止することはできません。
               本サービスは不正利用の抑止と流出元確認を目的とした保護機能を提供します。
+              利用者は、コンテンツの権利を尊重し、禁止事項に違反しないものとします。
             </p>
           </div>
 

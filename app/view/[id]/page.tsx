@@ -160,9 +160,9 @@ export default function ViewPage() {
 
           <ul className="mt-5 space-y-3 text-sm font-bold text-gray-200">
             <li>✓ ダウンロード・保存・右クリックは禁止されています。</li>
-            <li>✓ 画面全体に購入者識別用の透かしが表示されます。</li>
-            <li>✓ 流出が確認された場合、購入者情報から確認できる場合があります。</li>
-            <li>✓ ブラウザではOS標準スクショを完全には防げません。</li>
+            <li>✓ スクリーンショット、画面録画、転載、共有は禁止されています。</li>
+            <li>✓ コンテンツには購入者識別情報が付与されています。</li>
+            <li>✓ 不正利用が確認された場合、閲覧停止等の措置を行う場合があります。</li>
           </ul>
 
           <div className="mt-5 rounded-2xl bg-white/5 p-4 text-xs leading-6 text-gray-300">
@@ -174,11 +174,28 @@ export default function ViewPage() {
             </p>
           </div>
 
+          <div className="mt-5 space-y-2 text-center">
+            <a
+              href="/terms"
+              target="_blank"
+              className="block text-sm font-bold text-pink-400 underline"
+            >
+              利用規約を見る
+            </a>
+            <a
+              href="/notice"
+              target="_blank"
+              className="block text-sm font-bold text-pink-400 underline"
+            >
+              購入者向け注意事項を見る
+            </a>
+          </div>
+
           <button
             onClick={() => setAgreed(true)}
             className="mt-6 w-full rounded-2xl bg-pink-500 p-4 text-lg font-extrabold text-white active:scale-[0.99]"
           >
-            同意して閲覧する
+            利用規約に同意して閲覧する
           </button>
         </div>
       </main>
@@ -273,9 +290,8 @@ export default function ViewPage() {
       </div>
 
       <p className="mt-6 px-5 text-center text-sm font-bold leading-6 text-gray-400">
-        このコンテンツはダウンロード・保存・右クリックできません。
-        ブラウザ版ではスクリーンショットを完全に防止することはできないため、
-        購入者識別透かしにより流出抑止を行っています。
+        このコンテンツは保護されています。
+        スクリーンショット、画面録画、転載、共有は禁止されています。
       </p>
     </main>
   );

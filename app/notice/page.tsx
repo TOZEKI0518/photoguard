@@ -25,11 +25,6 @@ export default function NoticePage() {
           <li>・保存期限を過ぎると閲覧できなくなる場合があります。</li>
           <li>・不正利用が確認された場合、閲覧停止等の措置を行う場合があります。</li>
         </ul>
-
-        <p className="mt-8 rounded-2xl border border-gray-200 p-4 text-sm font-bold leading-6 text-gray-700">
-          ※ブラウザ版ではOS標準のスクリーンショットを完全に防止することはできません。
-          そのためPhotoGuardでは、透かし・識別情報・閲覧制限による流出抑止を行っています。
-        </p>
       </div>
     </main>
   );
